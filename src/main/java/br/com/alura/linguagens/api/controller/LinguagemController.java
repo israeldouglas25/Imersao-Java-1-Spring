@@ -26,45 +26,41 @@ public class LinguagemController {
 	private LinguagemRepository repository;
 
 	@GetMapping
-	public List<Linguagem> list() {
-		List<Linguagem> linguagens = repository.findAll();
-		return linguagens;
-	}
-	
-	@GetMapping("/ranking")
-	public List<Linguagem> listRanking() {
+	public ResponseEntity<List<Linguagem>> list() {
 		List<Linguagem> linguagens = repository.findAll();
 		linguagens.sort(Comparator.comparing(Linguagem:: getRanking)); // lista por ranking
-		return linguagens;
+		return ResponseEntity.ok(linguagens);
 	}
 
 	@PostMapping
-	public Linguagem insert(@RequestBody Linguagem linguagem) {
-		return repository.save(linguagem);
+	public ResponseEntity<Linguagem> insert(@RequestBody Linguagem linguagem) {
+		repository.save(linguagem);
+		return ResponseEntity.ok(linguagem) ;
 	}
 
 	@GetMapping("/{id}")
-	public Linguagem findById(@PathVariable String id) {
+	public ResponseEntity<Linguagem> findById(@PathVariable String id) {
 		Optional<Linguagem> linguagem = repository.findById(id);
-		return linguagem.get();
+		return ResponseEntity.ok(linguagem.get());
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Linguagem> update(@PathVariable String id, @RequestBody Linguagem linguagem) {
-		Linguagem linguagemDb = findById(id);
+		Optional<Linguagem> linguagemDb = repository.findById(id);
 
-		linguagemDb.setTitle(linguagem.getTitle());
-		linguagemDb.setImage(linguagem.getImage());
-		linguagemDb.setRanking(linguagem.getRanking());
+		linguagemDb.get().setTitle(linguagem.getTitle());
+		linguagemDb.get().setImage(linguagem.getImage());
+		linguagemDb.get().setRanking(linguagem.getRanking());
 
-		insert(linguagemDb);
+		repository.save(linguagemDb.get());
 
-		return ResponseEntity.ok(linguagemDb);
+		return ResponseEntity.ok(linguagemDb.get());
 	}
 
 	@DeleteMapping("/{id}")
-	public void delete(@PathVariable String id) {
+	public ResponseEntity<Linguagem> delete(@PathVariable String id) {
 		repository.deleteById(id);
+		return ResponseEntity.ok().build();
 	}
 
 }
